@@ -10,6 +10,7 @@ namespace metodichka
 {
     class Program
     {
+     
         //6.1
         static void counter(char[] data, out int numberVowel, out int numberConsonant)
         {
