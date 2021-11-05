@@ -9,37 +9,242 @@ using System.IO;
 
 namespace classwork091021
 {
-    class Student
+    struct Employeer
     {
-        public string firstName;
-        public string lastName;
-        int year;
-        string exam;
-        public Student()
+        string name;
+        string post;
+        public int impudence;
+        public bool stupidity;
+        public List<Employeer> friends;
+        public Employeer(string Name, string Post, int Impudence, bool Stupidity)
         {
-            Console.WriteLine("Введите имя");
-            firstName = Console.ReadLine();
-            Console.WriteLine("Введите фамилию");
-            lastName = Console.ReadLine();
-            Console.WriteLine("Введите год рождения");
-            year = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Введите экзамен");
-            exam = Console.ReadLine();
-        }
-        public Student(string[] input)
-        {
-            firstName = input[0];
-            lastName = input[1];
-            year = Convert.ToInt32(input[2]);
-            exam = input[3];
+            name = Name;
+            post = Post;
+            impudence = Impudence;
+            stupidity = Stupidity;
+            friends = null;
         }
         public override string ToString()
         {
-            return firstName + " " + lastName + " " + year + " " + exam;
+            return name;
+        }
+        public static bool operator ==(Employeer E1, Employeer E2)
+        {
+            if (E1.name != E2.name)
+            {
+                return false;
+            }
+            if (E1.post != E2.post)
+            {
+                return false;
+            }
+            if (E1.impudence != E2.impudence)
+            {
+                return false;
+            }
+            if (E1.stupidity != E2.stupidity)
+            {
+                return false;
+            }
+            return true;
+        }
+        public static bool operator !=(Employeer E1, Employeer E2)
+        {
+            if (E1.name != E2.name)
+            {
+                return true;
+            }
+            if (E1.post != E2.post)
+            {
+                return true;
+            }
+            if (E1.impudence != E2.impudence)
+            {
+                return true;
+            }
+            if (E1.stupidity != E2.stupidity)
+            {
+                return true;
+            }
+            return false;
+        }
+        public void AddFriend(Employeer friend)
+        {
+            if (friends == null)
+                friends = new List<Employeer>(1);
+            friends.Add(friend);
+        }
+        public Employeer[] GetFriends()
+        {
+            if (friends != null)
+            {
+                return friends.ToArray();
+            }
+            else
+                return null;
+        }
+    }
+    class Table
+    {
+        int number;
+        string color;
+        public List<Employeer> employeers;
+        public Table(int Number, string Color)
+        {
+            number = Number;
+            color = Color;
+            employeers = null;
+        }
+        public int countEmployeers()
+        {
+            if (employeers == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return employeers.Count;
+            }
+        }
+        public void AddEmployeer(Employeer employeer)
+        {
+            if (employeers == null)
+                employeers = new List<Employeer>(1);
+            employeers.Add(employeer);
+        }
+        public override string ToString()
+        {
+            return Convert.ToString(number);
+        }
+        public bool HaveEmployeer(Employeer employeer)
+        {
+            if (employeers != null)
+            {
+                foreach (Employeer E in employeers)
+                {
+                    if (employeer == E)
+                        return true;
+                }
+            }
+            return false;
         }
     }
     class Program
     {
+        static void AddQueue(Employeer newEmployeer, Queue<Employeer> employeers)
+        {
+            if (newEmployeer.stupidity)
+            {
+                int count = employeers.Count;
+                int numberOvertake = 1;
+                if (newEmployeer.impudence != 0)
+                {
+                    numberOvertake = newEmployeer.impudence;
+                }
+                Employeer[] copyQueue = new Employeer[employeers.Count];
+                int N = employeers.Count - numberOvertake;
+                if (N < 0) N = 0;
+                for (int i = 0; i < count; i++)
+                {
+                    copyQueue[i] = employeers.Dequeue();
+                }
+                for (int i = 0; i < N; i++)
+                {
+                    employeers.Enqueue(copyQueue[i]);
+                }
+                employeers.Enqueue(newEmployeer);
+                for (int i = N; i < count; i++)
+                {
+                    employeers.Enqueue(copyQueue[i]);
+                }
+            }
+            else
+            {
+                employeers.Enqueue(newEmployeer);
+            }
+        }
+        static void Sit(Employeer employeer, Stack<Table> tables)
+        {
+            bool isFounded = false;
+            Stack<Table> checkedTables = new Stack<Table>(tables.Count);
+            int freedomNumb = 2;
+            if (employeer.impudence != 0)
+            {
+                freedomNumb = 3;
+            }
+            if (employeer.stupidity) freedomNumb = 0;
+            while (!isFounded)
+            {
+                Table currentTable;
+                try
+                {
+                    currentTable = tables.Peek();
+                }
+                catch
+                {
+                    Console.WriteLine(employeer + " обедает стоя");
+                    break;
+                }
+                int countEmployeers = currentTable.countEmployeers();
+                if (countEmployeers == 0)
+                {
+                    Console.WriteLine(employeer + " Сел за стол " + currentTable);
+                    currentTable.AddEmployeer(employeer);
+                    isFounded = true;
+                }
+                else if (countEmployeers <= freedomNumb)
+                {
+                    Employeer[] friends = employeer.GetFriends();
+                    if (friends != null)
+                    {
+                        foreach (Employeer friend in friends)
+                        {
+                            if (currentTable.HaveEmployeer(friend))
+                            {
+                                Console.WriteLine(employeer + " Сел за стол " + currentTable);
+                                currentTable.AddEmployeer(employeer);
+                                isFounded = true;
+                            }
+                        }
+                    }
+                }
+                checkedTables.Push(tables.Pop());
+            }
+            while (checkedTables.Count > 0)
+            {
+                tables.Push(checkedTables.Pop());
+            }
+        }
+        class Student
+        {
+            public string firstName;
+            public string lastName;
+            int year;
+            string exam;
+            public Student()
+            {
+                Console.WriteLine("Введите имя");
+                firstName = Console.ReadLine();
+                Console.WriteLine("Введите фамилию");
+                lastName = Console.ReadLine();
+                Console.WriteLine("Введите год рождения");
+                year = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Введите экзамен");
+                exam = Console.ReadLine();
+            }
+            public Student(string[] input)
+            {
+                firstName = input[0];
+                lastName = input[1];
+                year = Convert.ToInt32(input[2]);
+                exam = input[3];
+            }
+            public override string ToString()
+            {
+                return firstName + " " + lastName + " " + year + " " + exam;
+            }
+        }
+
         static void NewStudent(Dictionary<int, Student> students)
         {
             Student newStudent = new Student();
@@ -55,7 +260,7 @@ namespace classwork091021
             string lastName = Console.ReadLine();
             foreach (KeyValuePair<int, Student> keyValue in students)
             {
-                if ((keyValue.Value.firstName == firstName) && (keyValue.Value.lastName == lastName))
+                if ((keyValue.Value.firstName.Equals(firstName)) && (keyValue.Value.lastName == lastName))
                 {
                     students.Remove(keyValue.Key);
                 }
@@ -72,7 +277,115 @@ namespace classwork091021
                 students.Add(keyValue.Key, keyValue.Value);
             }
         }
+        static void Swap(List<String> array, int i1, int i2, string value1, string value2)
+        {
+            array[i1] = value1;
+            array[i2] = value2;
+        }
+        //1.5
+        struct Granny
+        {
+            string name;
+            public string Name
+            {
+                get
+                {
+                    return name;
+                }
+                set
+                {
 
+                }
+            }
+            int age;
+            public List<string> desease;
+            string medicine;
+            public Granny(string Name, int Age, List<string> Desease, string Medicine)
+            {
+                name = Name;
+                age = Age;
+                desease = Desease;
+                medicine = Medicine;
+            }
+            public override string ToString()
+            {
+                return name;
+            }
+        }
+        struct Hospital
+        {
+            string name;
+            List<string> deseases;
+            List<Granny> Patients;
+            int capacity;
+            public Hospital(string Name, List<string> Deseases, int Capacity)
+            {
+                name = Name;
+                deseases = Deseases;
+                Patients = new List<Granny>(Capacity);
+                capacity = Capacity;
+            }
+            public bool TryAddPatient(Granny patient)
+            {
+                if (Patients.Count < capacity)
+                {
+                    if (patient.desease.Count != 0)
+                    {
+                        int numberGrannyDeseases = 0;
+                        foreach (string desease in deseases)
+                        {
+                            foreach (string grannyDesease in patient.desease)
+                            {
+                                if (grannyDesease == desease)
+                                {
+                                    numberGrannyDeseases++;
+                                }
+                            }
+                        }
+                        double part = (double)numberGrannyDeseases / (double)patient.desease.Count;
+                        if (part > 0.5)
+                        {
+                            Patients.Add(patient);
+                            return true;
+                        }
+                        else return false;
+                    }
+                    else
+                    {
+                        Patients.Add(patient);
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            public void Statis()
+            {
+                Console.WriteLine(name);
+                foreach (string D in deseases)
+                {
+                    Console.WriteLine(D);
+                }
+                Console.WriteLine("Пациентов в больнице " + Patients.Count);
+                Console.WriteLine(100 * (Convert.ToDouble(Patients.Count) / Convert.ToDouble(capacity)) + "%");
+            }
+        }
+        static void distribute(Granny granny, Stack<Hospital> hospitals)
+        {
+            bool flag = false;
+            foreach (Hospital H in hospitals)
+            {
+                flag = H.TryAddPatient(granny);
+                if (flag)
+                {
+                    Console.WriteLine("Бабушка " + granny + " попала в больницу");
+                    return;
+                }
+            }
+            Console.WriteLine("Бабушка " + granny + " осталась плакать(((");
+        }
         static void Main(string[] args)
         {
             {
@@ -103,6 +416,7 @@ namespace classwork091021
                 //1.2
                 Console.WriteLine("1.2");
                 List<string> pictures = new List<string>()
+
             {
                 @"folder\1.jpg",
                 @"folder\1-копия.jpg",
@@ -169,10 +483,10 @@ namespace classwork091021
                 @"folder\32.jpg",
                 @"folder\32-копия.jpg"
             };
-                Console.WriteLine("\n не перемешанный:\n" + String.Join("\n", pictures));
+                Random rnd = new Random();
+                Console.WriteLine("не перемешанный:\n" + (pictures));
                 for (int i = 0; i < pictures.Count; i++)
                 {
-                    Random rnd = new Random();
                     int numodd = rnd.Next(pictures.Count);
                     Swap(pictures, i, numodd, pictures[i], pictures[numodd]);
                 }
@@ -188,17 +502,17 @@ namespace classwork091021
                 {
                     string[] studentData = input[i].Split();
                     Student newStudent = new Student(studentData);
-                    int score = Convert.ToInt32(studentData[studentData.Length - 1]);
+                    int score = Convert.ToInt32(studentData[studentData.Length - 2]);
                     students.Add(score, newStudent);
                 }
                 bool flag = true;
                 while (flag)
                 {
                     Console.WriteLine("Введите команду");
-                    string instruction = Console.ReadLine();
+                    string instruction = Console.ReadLine().ToLower();
                     switch (instruction)
                     {
-                        case "Новый студент":
+                        case "новый студент":
                             NewStudent(students);
                             break;
                         case "Удалить":
@@ -215,17 +529,89 @@ namespace classwork091021
                     }
                 }
             }
+            //1.4
+            Console.WriteLine("1.4");
+            Stack<Table> tables = new Stack<Table>(10);
+            Queue<Employeer> employeers = new Queue<Employeer>(10);
+            tables.Push(new Table(1, "Красный"));
+            tables.Push(new Table(2, "Синий"));
+            tables.Push(new Table(3, "Зелёный"));
+            Employeer E1 = new Employeer("имя1", "сотрудник", 0, false);
+            Employeer E2 = new Employeer("имя2", "сотрудник", 1, true);
+            E1.AddFriend(E2);
+            E2.AddFriend(E1);
+            AddQueue(E1, employeers);
+            AddQueue(E2, employeers);
+            AddQueue(new Employeer("имя3", "сотрудник", 0, false), employeers);
+            AddQueue(new Employeer("имя4", "сотрудник", 7, true), employeers);
+            AddQueue(new Employeer("имя5", "сотрудник", 2, true), employeers);
+            AddQueue(new Employeer("имя6", "сотрудник", 1, true), employeers);
+            AddQueue(new Employeer("имя7", "сотрудник", 0, false), employeers);
+            foreach (Employeer E in employeers)
+            {
+                Console.WriteLine(E);
+            }
+            while (employeers.Count > 0)
+            {
+                Sit(employeers.Dequeue(), tables);
+            }
 
-
-
+            //1.5
+            Console.WriteLine("1.5");
+            Stack<Hospital> hospitals = new Stack<Hospital>(3);
+            List<string> desease1 = new List<string>(2);
+            desease1.Add("ОРВИ");
+            desease1.Add("Диабет");
+            hospitals.Push(new Hospital("Больница 1", desease1, 1));
+            List<string> desease2 = new List<string>(1);
+            desease2.Add("Гонорея");
+            hospitals.Push(new Hospital("Больница 2", desease2, 5));
+            List<string> desease3 = new List<string>(2);
+            desease3.Add("Шизофрения");
+            desease3.Add("Деменция");
+            hospitals.Push(new Hospital("Больница 3", desease3, 10));
+            List<Granny> grannies = new List<Granny>(4);
+            Console.WriteLine("Введите бабуль");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.WriteLine("введите имя");
+                string newName = Console.ReadLine();
+                Console.WriteLine("введите возраст");
+                int newAge = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("введите количество заболеваний");
+                int numberDesease = Convert.ToInt32(Console.ReadLine());
+                List<string> deseases = new List<string>(numberDesease);
+                for (int j = 0; j < numberDesease; j++)
+                {
+                    Console.WriteLine("введите название болезни");
+                    deseases.Add(Console.ReadLine());
+                }
+                Console.WriteLine("введите лекарство");
+                grannies.Add(new Granny(newName, newAge, deseases, Console.ReadLine()));
+            }
+            foreach (Granny G in grannies)
+            {
+                distribute(G, hospitals);
+            }
+            foreach (Granny G in grannies)
+            {
+                Console.WriteLine(G);
+            }
+            foreach (Hospital H in hospitals)
+            {
+                H.Statis();
+            }
         }
-        static void Swap(List<String> array, int i1, int i2, string value1, string value2)
-        {
-            array[i1] = value1;
-            array[i2] = value2;
-        }
-    } 
-}
+
+
+
+    }
+
+    }
+
+
+    
+
 
 
     

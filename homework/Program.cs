@@ -10,7 +10,7 @@ namespace homework
     class Program
     {
         static void Main(string[] args)
-            {
+        {
             Console.WriteLine("адская кухня");
                 char[] allVovel = { 'О', 'Э', 'Е', 'И', 'Ы', 'У', 'Ё', 'Ю', 'Я' };
                 Console.WriteLine("что должен сказать Гордон?");
@@ -48,7 +48,7 @@ namespace homework
                 Console.WriteLine(output);
             }
         }
-        }
+     }
     
 
 
