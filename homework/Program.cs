@@ -32,7 +32,7 @@ namespace homework
         {
             Console.WriteLine("Проверка пароля");
             string[] password = { "password", "pass123", "pass" };
-            StreamReader reader = new StreamReader("input.txt");
+            StreamReader reader = new StreamReader(".txt");
             string passBinary = reader.ReadToEnd(); //ReadToEnd-считывает все символы, начиная с текущей позиции до конца потока
             passBinary = passBinary.Replace(" ", "");
             if (DecodePass(password, ref passBinary))
